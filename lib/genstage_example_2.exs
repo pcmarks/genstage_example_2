@@ -8,13 +8,23 @@ defmodule GenstageExample2 do
   1. design a multi-input stage, and
   2. allow for the uneven appearances of input events.
 
+  Two examples of flows are possible:
+  1. Two Constant stages feed a Sum stage whose output is asked for by a
+  Timer stage.
+  2. Two enumerated flows feed a Sum stage whose output is asked for by a
+  Timer stage.
+
+  See the comments at the bottom of this moduledoc.
+
   ## To run:
 
   1. cd genstage_example_2
-  2. mix run lib/genstage_example_2.exs
+  2. mix deps.get
+  3. mix run lib/genstage_example_2.exs
   """
   defmodule Constant do
     @moduledoc """
+    This stage will always produce demand number of values.
     """
     use GenStage
     def init(constant) do
@@ -27,10 +37,15 @@ defmodule GenstageExample2 do
   end
 
   defmodule Sum do
+    @moduledoc """
+    The Sum stage expects two input values at inports named :addend and :augend.
+    It will produce the sum of as many pairs of inputs as possible. For example,
+    the sum of [1,3,5] and [5,3] is [6,6] and the sum of [] and [2,4,6] is []
+    """
     use GenStage
 
-    def init(_) do
-      {:producer_consumer, %{}}
+    def init(_not_used) do
+      {:producer_consumer, %{:addend => {nil, []}, :augend => {nil, []}}}
     end
     def handle_subscribe(:consumer, _opts, _to_or_from, state) do
       {:automatic, state}
@@ -84,12 +99,16 @@ defmodule GenstageExample2 do
   end
 
   defmodule Ticker do
+    @moduledoc """
+    A Ticker stage waits for some number of milliseconds before asking for
+    events. When an event is received it is printed.
+    """
     use GenStage
     def init(sleeping_time) do
       {:consumer, sleeping_time}
     end
     def handle_events(events, from, sleeping_time) do
-      IO.puts "Ticker events: #{inspect events}"
+      IO.puts "Ticker events: #{inspect(events, charlists: :as_lists)}"
       Process.sleep(sleeping_time)
       {:noreply, [], sleeping_time}
     end
@@ -97,12 +116,16 @@ defmodule GenstageExample2 do
 
   # {:ok, addend} = GenStage.start_link(Constant, 3)
   # {:ok, augend} = GenStage.start_link(Constant, 4)
+  # {:ok, sum}    = GenStage.start_link(Sum, 0)
+  # {:ok, ticker} = GenStage.start_link(Ticker, 5_000)
+  # Uncomment the next four code lines and comment out the four lines above
+  # to use two enumerable flows as input to Sum
   {:ok, addend} = GenStage.from_enumerable([1,2,3])
   {:ok, augend} = GenStage.from_enumerable([3,4,5,7])
   {:ok, sum}    = GenStage.start_link(Sum, 0)
   {:ok, ticker} = GenStage.start_link(Ticker, 5_000)
 
-  GenStage.sync_subscribe(ticker, to: sum)
+  GenStage.sync_subscribe(ticker, to: sum, max_demand: 1)
   GenStage.sync_subscribe(sum, to: augend, inport: :augend)
   GenStage.sync_subscribe(sum, to: addend, inport: :addend)
 
