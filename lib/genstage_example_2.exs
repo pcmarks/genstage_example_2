@@ -1,20 +1,18 @@
 alias Experimental.GenStage
 defmodule GenstageExample2 do
   @moduledoc """
-  This is an example of a simple four stage GenStage flow. It features a
-  multi-input stage - an adder that requires two values and computes their sum.
+  This is an example of a simple four stage GenStage flow. It features a multi-input stage - an adder that requires two values and computes their sum. For a more detailed
+  explanation, please see this blog [post](www.elixirfbp.com)
 
   The example is meant to illustrate how to
   1. design a multi-input stage, and
   2. allow for the uneven appearances of input events.
 
-  Two examples of flows are possible:
+  Two examples of flows are possible - see the comments for directions:
   1. Two Constant stages feed a Sum stage whose output is asked for by a
   Timer stage.
   2. Two enumerated flows feed a Sum stage whose output is asked for by a
   Timer stage.
-
-  See the comments at the bottom of this moduledoc.
 
   ## To run:
 
@@ -114,16 +112,16 @@ defmodule GenstageExample2 do
     end
   end
 
-  # {:ok, addend} = GenStage.start_link(Constant, 3)
-  # {:ok, augend} = GenStage.start_link(Constant, 4)
-  # {:ok, sum}    = GenStage.start_link(Sum, 0)
-  # {:ok, ticker} = GenStage.start_link(Ticker, 5_000)
-  # Uncomment the next four code lines and comment out the four lines above
-  # to use two enumerable flows as input to Sum
-  {:ok, addend} = GenStage.from_enumerable([1,2,3])
-  {:ok, augend} = GenStage.from_enumerable([3,4,5,7])
+  {:ok, addend} = GenStage.start_link(Constant, 3)
+  {:ok, augend} = GenStage.start_link(Constant, 4)
   {:ok, sum}    = GenStage.start_link(Sum, 0)
   {:ok, ticker} = GenStage.start_link(Ticker, 5_000)
+  # Uncomment the next four code lines and comment out the four lines above
+  # to use two enumerable flows as input to Sum
+  # {:ok, addend} = GenStage.from_enumerable([1,2,3])
+  # {:ok, augend} = GenStage.from_enumerable([3,4,5,7])
+  # {:ok, sum}    = GenStage.start_link(Sum, 0)
+  # {:ok, ticker} = GenStage.start_link(Ticker, 5_000)
 
   GenStage.sync_subscribe(ticker, to: sum, max_demand: 1)
   GenStage.sync_subscribe(sum, to: augend, inport: :augend)
