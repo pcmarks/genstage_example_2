@@ -70,17 +70,17 @@ defmodule GenstageExample2 do
       # We are assuming that the subscription exists
       state = Map.update!(state, :addend,
           fn({tag, addends}) -> {tag, addends ++ events} end)
-      {return_events, new_state} = do_sum(state)
+      {return_events, new_state} = sum_inports(state)
       {:noreply, return_events, new_state}
     end
     def handle_events(events, {_pid, tag}, %{:augend => {tag, _}} = state) do
       # We are assuming that the subscription exists
       state = Map.update!(state, :augend,
             fn({tag, augends}) -> {tag, augends ++ events} end)
-      {return_events, new_state} = do_sum(state)
+      {return_events, new_state} = sum_inports(state)
       {:noreply, return_events, new_state}
     end
-    defp do_sum(state) do
+    defp sum_inports(state) do
       {augend_tag, augends} = Map.get(state, :augend, {nil, []})
       {addend_tag, addends} = Map.get(state, :addend, {nil, []})
       {addends, augends, results} = sum_inports(addends, augends, [])
@@ -88,14 +88,14 @@ defmodule GenstageExample2 do
       state = Map.put(state, :augend, {augend_tag, augends})
       {results, state}
     end
-    defp sum_inports([], augends, results) do
+    defp do_sum([], augends, results) do
       {[], augends, results}
     end
-    defp sum_inports(addends, [], results) do
+    defp do_sum(addends, [], results) do
       {addends, [], results}
     end
-    defp sum_inports([h_addends|t_addends], [h_augends|t_augends], results) do
-      sum_inports(t_addends, t_augends, results ++ [h_addends + h_augends])
+    defp do_sum([h_addends|t_addends], [h_augends|t_augends], results) do
+      do_sum(t_addends, t_augends, results ++ [h_addends + h_augends])
     end
 
   end
