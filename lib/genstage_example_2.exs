@@ -8,7 +8,7 @@ defmodule GenstageExample2 do
   1. design a multi-input stage, and
   2. allow for the uneven appearances of input events.
 
-  Two examples of flows are possible - see the comments for directions:
+  Two examples of flows are possible - see the comments at the bottom for directions:
   1. Two Constant stages feed a Sum stage whose output is asked for by a
   Timer stage.
   2. Two enumerated flows feed a Sum stage whose output is asked for by a
@@ -45,6 +45,10 @@ defmodule GenstageExample2 do
     def init(_not_used) do
       {:producer_consumer, %{:addend => {nil, []}, :augend => {nil, []}}}
     end
+    @doc """
+    This is actually the default but needs to be supplied because we are
+    handling the producer subscriptions below.
+    """
     def handle_subscribe(:consumer, _opts, _to_or_from, state) do
       {:automatic, state}
     end
@@ -105,7 +109,7 @@ defmodule GenstageExample2 do
     def init(sleeping_time) do
       {:consumer, sleeping_time}
     end
-    def handle_events(events, from, sleeping_time) do
+    def handle_events(events, _from, sleeping_time) do
       IO.puts "Ticker events: #{inspect(events, charlists: :as_lists)}"
       Process.sleep(sleeping_time)
       {:noreply, [], sleeping_time}
