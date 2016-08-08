@@ -1,6 +1,7 @@
 # GenstageExample2
 
-This is an example of a simple four stage GenStage flow. It features a multi-input stage - an adder that requires two values and computes their sum.
+This is an example of a simple four stage GenStage flow. It features a multi-input stage - an adder that requires two values and computes their sum. For a more detailed
+explanation, please see this blog [post](www.elixirfbp.com)
 
 The example is meant to illustrate how to
 1. design a multi-input stage, and
