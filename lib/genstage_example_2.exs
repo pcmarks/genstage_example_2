@@ -83,7 +83,7 @@ defmodule GenstageExample2 do
     defp sum_inports(state) do
       {augend_tag, augends} = Map.get(state, :augend, {nil, []})
       {addend_tag, addends} = Map.get(state, :addend, {nil, []})
-      {addends, augends, results} = sum_inports(addends, augends, [])
+      {addends, augends, results} = do_sum(addends, augends, [])
       state = Map.put(state, :addend, {addend_tag, addends})
       state = Map.put(state, :augend, {augend_tag, augends})
       {results, state}
