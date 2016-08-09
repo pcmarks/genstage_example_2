@@ -27,6 +27,6 @@ defmodule GenstageExample2.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:gen_stage, "~> 0.4.3"}]
+    [{:gen_stage, "~> 0.5.0"}]
   end
 end
