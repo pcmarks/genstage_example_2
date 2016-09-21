@@ -68,25 +68,26 @@ defmodule GenstageExample2 do
 
     def handle_events(events, {_pid, tag}, %{:addend => {tag, _}} = state) do
       # We are assuming that the subscription exists
-      state = Map.update!(state, :addend,
+      upd_state = Map.update!(state, :addend,
           fn({tag, addends}) -> {tag, addends ++ events} end)
-      {return_events, new_state} = sum_inports(state)
+      {return_events, new_state} = sum_inports(upd_state)
       {:noreply, return_events, new_state}
     end
     def handle_events(events, {_pid, tag}, %{:augend => {tag, _}} = state) do
       # We are assuming that the subscription exists
-      state = Map.update!(state, :augend,
+      upd_state = Map.update!(state, :augend,
             fn({tag, augends}) -> {tag, augends ++ events} end)
-      {return_events, new_state} = sum_inports(state)
+      {return_events, new_state} = sum_inports(upd_state)
       {:noreply, return_events, new_state}
     end
     defp sum_inports(state) do
       {augend_tag, augends} = Map.get(state, :augend, {nil, []})
       {addend_tag, addends} = Map.get(state, :addend, {nil, []})
-      {addends, augends, results} = do_sum(addends, augends, [])
-      state = Map.put(state, :addend, {addend_tag, addends})
-      state = Map.put(state, :augend, {augend_tag, augends})
-      {results, state}
+      {upd_addends, upd_augends, results} = do_sum(addends, augends, [])
+      new_state = state
+        |> Map.put(:addend, {addend_tag, upd_addends})
+        |> Map.put(:augend, {augend_tag, upd_augends})
+      {results, new_state}
     end
     defp do_sum([], augends, results) do
       {[], augends, results}
